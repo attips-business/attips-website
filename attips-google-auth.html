@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>attips Google Sign-In</title>
+<style>html,body{margin:0;padding:0;background:transparent;font-family:Arial,sans-serif}#button{min-height:44px;display:flex;justify-content:center;align-items:center}#error{font-size:12px;color:#b42318;text-align:center}</style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+<div id="button"></div><div id="error"></div>
+<script>
+(function(){
+  'use strict';
+  const params=new URLSearchParams(location.search);
+  const clientId=params.get('client_id');
+  function send(type,data){if(window.parent&&window.parent!==window)window.parent.postMessage(Object.assign({type:type},data||{}),'*');}
+  function init(){
+    if(!clientId){document.getElementById('error').textContent='Sign-in configuration missing.';return;}
+    if(!(window.google&&google.accounts&&google.accounts.id)){setTimeout(init,100);return;}
+    google.accounts.id.initialize({client_id:clientId,callback:function(response){if(response&&response.credential)send('ATTIPS_GOOGLE_ID_TOKEN',{credential:response.credential});else send('ATTIPS_GOOGLE_AUTH_ERROR',{message:'Google did not return a sign-in credential.'});},auto_select:false});
+    google.accounts.id.renderButton(document.getElementById('button'),{theme:'outline',size:'large',shape:'rectangular',text:'signin_with',width:280});
+  }
+  window.addEventListener('load',init);
+})();
+</script>
+</body>
+</html>
